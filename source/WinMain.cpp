@@ -13,6 +13,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR , int nCmdShow) {
 	win.CreateButtonDEF(L"draw Mandelbrot", 23, 230, 200, 40, ID_BUTTON_MANDELBROTT_DRAW);
 	win.CreateButtonDEF(L"draw Julia", 250, 230, 200, 40, ID_BUTTON_JULIA_DRAW);
 	win.CreateButtonDEF(L"reset", 23, 280,428, 40, ID_BUTTON_RESET);
+	win.CreateButtonDEF(L"Save Picture", 23, 330,428, 40, ID_BUTTON_SAVE_FILE);
 	Mandelbrot::Registed(hInstance);
 	Julia::Registed(hInstance);
 	while (GetMessage(&msg, nullptr, 0, 0)) {

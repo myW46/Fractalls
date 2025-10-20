@@ -1,6 +1,11 @@
 ﻿#include "MainWindow.h"
 #include "ConstDefine.h"
 #include <windowsx.h>
+#include <shobjidl.h>     
+#include <objbase.h> 
+#include <string>
+#include <shlwapi.h>      
+#pragma comment(lib, "shlwapi.lib")  
 
 const wchar_t Name[] = L"Application";
 const wchar_t Name_Mandelbrott[] = L"Mandelbrot";
@@ -390,8 +395,27 @@ LRESULT MainWindow::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             break;
         
         case ID_BUTTON_RESET:
+
             ResetFractals();
             break;
+        case ID_BUTTON_SAVE_FILE: {
+            HWND hMandelbrot = FindWindowEx(hwnd, NULL, Name_Mandelbrott, NULL);
+            HWND hJulia = FindWindowEx(hwnd, NULL, Name_Julia, NULL);
+            if (hMandelbrot) {
+
+                MandelbrottRender* renderer = (MandelbrottRender*)GetWindowLongPtr(hMandelbrot, GWLP_USERDATA);
+                SavePicture(renderer->GetBitmap(), "mandelbrot.bmp");
+            }
+            else if (hJulia) {
+
+                JuliaRender* renderer = (JuliaRender*)GetWindowLongPtr(hJulia, GWLP_USERDATA);
+
+                SavePicture(renderer->GetBitmap(), "julia.bmp");
+
+            }
+
+            break;
+        }
         }
         return 0;
     case WM_UPDATE_COORDS: {
@@ -440,3 +464,63 @@ void MainWindow::ResetFractals() {
 
         SetWindowText(hwndCoordsStatic, L"Координаты: X: 0, Y: 0");
     }
+
+void MainWindow::SavePicture(HBITMAP BitMap  , const char* Name) {
+
+    IFileSaveDialog* p_file_save;
+    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+    CoCreateInstance(CLSID_FileSaveDialog, NULL, CLSCTX_ALL, IID_IFileSaveDialog, (void**)&p_file_save);
+    COMDLG_FILTERSPEC fileTypes[] = {
+        {L"Bitmap Images", L"*.bmp"},
+        {L"All Files", L"*.*"}
+    };
+    p_file_save->SetFileTypes(2, fileTypes);
+    p_file_save->SetDefaultExtension(L"bmp");
+    if (SUCCEEDED(p_file_save->Show(hwnd))) {
+        IShellItem* p_Item;
+        p_file_save->GetResult(&p_Item);
+        PWSTR file_path;
+        p_Item->GetDisplayName(SIGDN_FILESYSPATH, &file_path);
+
+
+        BITMAP bm;
+        GetObject(BitMap, sizeof(BITMAP), &bm);
+
+        int width = bm.bmWidth;
+        int height = bm.bmHeight;
+        BITMAPFILEHEADER btf = {};
+        btf.bfType = 0x4D42;
+        btf.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (width * height * 4);
+        btf.bfReserved1 = 0;
+        btf.bfReserved2 = 0;
+        btf.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+
+
+        BITMAPINFOHEADER bts = { 0 };
+        bts.biSize = sizeof(BITMAPINFOHEADER);
+        bts.biWidth = width;
+        bts.biHeight = height;
+        bts.biPlanes = 1;
+        bts.biBitCount = 32;
+        bts.biCompression = BI_RGB;
+        HANDLE hFile = CreateFile(file_path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+        WriteFile(hFile, &btf, sizeof(btf), NULL, NULL);
+        WriteFile(hFile, &bts, sizeof(bts), NULL, NULL);
+
+        HDC hdc = GetDC(NULL);
+        void* pixels = malloc(width*height*4);
+        GetDIBits(hdc, BitMap, 0, height, pixels, (BITMAPINFO*)&bts, DIB_RGB_COLORS);
+        WriteFile(hFile, pixels, width * height * 4, NULL, NULL);
+        free(pixels);
+        ReleaseDC(NULL, hdc);
+        CloseHandle(hFile);
+
+
+        CoTaskMemFree(file_path);  
+        p_Item->Release();
+    }
+    p_file_save->Release();  
+    CoUninitialize();   
+
+    MessageBox(hwnd, L"Файл сохранен!", L"Успех", MB_OK);
+}

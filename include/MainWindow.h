@@ -21,7 +21,7 @@ public:
 	void CreateJulia();
 	void ResetFractals();
 	void CreateCoordsStatic(HINSTANCE hInstance);
-
+	void SavePicture(HBITMAP BitMap, const char* Name);
 private:
 	HWND hwnd;
 	HWND hwndMandelbrot;
