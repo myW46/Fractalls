@@ -27,13 +27,12 @@ private:
 	HWND hwndMandelbrot;
 	HWND hwndJulia;
 	HWND hwndCoordsStatic;
-	//static LRESULT CALLBACK CoordsStaticProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	static LRESULT CALLBACK StaticWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	LRESULT WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void Registed(HINSTANCE hInstance);
 	
 	void Create(HINSTANCE hInstance, int nCmdShow);
-	//friend  LRESULT CALLBACK CoordsStaticProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	
 	
 };
 class Mandelbrot {
