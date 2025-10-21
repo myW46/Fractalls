@@ -391,9 +391,11 @@ LRESULT MainWindow::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     case WM_COMMAND:
         switch (LOWORD(wParam)) {
         case ID_BUTTON_JULIA_DRAW:
+            ResetFractals();
             CreateJulia();
             break;
         case ID_BUTTON_MANDELBROTT_DRAW:
+            ResetFractals();
             CreateMandelbrott();
             break;
         
@@ -578,23 +580,29 @@ void MainWindow::UpdateColorPhases(int sliderID, double& phaseVar) {
     HWND hSlider = GetDlgItem(hwnd, sliderID);
     int value = SendMessage(hSlider, TBM_GETPOS, 0, 0);
     phaseVar = value / 100.0;
-    HWND hFractal = FindWindowEx(hwnd, NULL, Name_Mandelbrott, NULL);
-    if (!hFractal) {
-        hFractal = FindWindowEx(hwnd, NULL, Name_Julia, NULL);
+
+    
+    HWND hMandelbrot = FindWindowEx(hwnd, NULL, Name_Mandelbrott, NULL);
+    HWND hJulia = FindWindowEx(hwnd, NULL, Name_Julia, NULL);
+
+    if (hMandelbrot) {
+        MandelbrottRender* renderer = (MandelbrottRender*)GetWindowLongPtr(hMandelbrot, GWLP_USERDATA);
+        if (renderer) {
+            renderer->SetColorPhase(redPhase, greenPhase, bluePhase);
+            renderer->Draw();
+            InvalidateRect(hMandelbrot, NULL, TRUE);
+        }
+        return;
     }
-    if (hFractal) {
-        void* rendererPtr = (void*)GetWindowLongPtr(hFractal, GWLP_USERDATA);
-        MandelbrottRender* mandelRenderer = (MandelbrottRender*)rendererPtr;
-        JuliaRender* juliaRenderer = (JuliaRender*)rendererPtr;
-        if (mandelRenderer) {
-            mandelRenderer->SetColorPhase(redPhase, greenPhase, bluePhase);
-            mandelRenderer->Draw();
-            InvalidateRect(hFractal, NULL, TRUE); 
+
+   
+    if (hJulia ) {
+        JuliaRender* renderer = (JuliaRender*)GetWindowLongPtr(hJulia, GWLP_USERDATA);
+        if (renderer) {
+            renderer->SetColorPhase(redPhase, greenPhase, bluePhase);
+            renderer->Draw();
+            InvalidateRect(hJulia, NULL, TRUE);
         }
-        else if (juliaRenderer) {
-            juliaRenderer->SetColorPhase(redPhase, greenPhase, bluePhase);
-            juliaRenderer->Draw();
-            InvalidateRect(hFractal, NULL, TRUE);
-        }
+        return;
     }
 }

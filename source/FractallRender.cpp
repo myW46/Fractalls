@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 #include "complex.h"
 #include <cmath>
-
+#include <thread>
 const long double M_PI = std::acos(-1.0);
 void MandelbrottRender::createBitmap(int w, int h){
 	width = w;
@@ -162,6 +162,11 @@ void JuliaRender::RenderFromPixels(int startX, int startY, int endX, int endY) {
 	viewTop = mathStartY;
 	viewBottom = mathEndY;
 	Draw();
+	/*std::thread t1([this]() {
+		this->Draw();
+		});
+	t1.detach();*/
+	
 
 }
 
