@@ -1,6 +1,8 @@
 #include "MainWindow.h"
 #include "complex.h"
+#include <cmath>
 
+const long double M_PI = std::acos(-1.0);
 void MandelbrottRender::createBitmap(int w, int h){
 	width = w;
 	height = h;
@@ -22,6 +24,9 @@ void MandelbrottRender::createBitmap(int w, int h){
 	viewRight = 2.0;
 	viewTop = -2.0;
 	viewBottom =2.0;
+	redPhase = 0.0;         
+	greenPhase = M_PI / 3;   
+	bluePhase = 2 * M_PI / 3;
 }
 void JuliaRender::createBitmap(int w, int h) {
 	width = w;
@@ -43,6 +48,9 @@ void JuliaRender::createBitmap(int w, int h) {
 	viewRight = 2.0;
 	viewTop = -2.0;
 	viewBottom = 2.0;
+	redPhase = 0.0;
+	greenPhase = M_PI / 3;
+	bluePhase = 2 * M_PI / 3;
 }
 void MandelbrottRender::Draw() {
 	for (int y = 0; y < height; y++) {
@@ -75,9 +83,9 @@ COLORREF MandelbrottRender::CalculateMandelbrot(int x, int y) {
 		return RGB(0,0,0);
 	}
 	else {
-		int r = (it * 5) % 255;
-		int g = (it * 7) % 255;
-		int b = (it * 11) % 255;
+		int r = 128 + 127 * sin(it * 0.1 + redPhase);   
+		int g = 128 + 127 * sin(it * 0.1 + greenPhase);
+		int b = 128 + 127 * sin(it * 0.1 + bluePhase);
 		return RGB(r, g, b);
 	}
 
@@ -121,9 +129,9 @@ COLORREF JuliaRender::CalculateJulia(int x, int y) {
 		return RGB(0, 0, 0);
 	}
 	else {
-		int r = (it * 5) % 255;
-		int g = (it * 7) % 255;
-		int b = (it * 11) % 255;
+		int r = 128 + 127 * sin(it * 0.1 + redPhase);
+		int g = 128 + 127 * sin(it * 0.1 + greenPhase);
+		int b = 128 + 127 * sin(it * 0.1 + bluePhase);
 		return RGB(r, g, b);
 	}
 

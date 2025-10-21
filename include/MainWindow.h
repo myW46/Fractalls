@@ -21,12 +21,20 @@ public:
 	void CreateJulia();
 	void ResetFractals();
 	void CreateCoordsStatic(HINSTANCE hInstance);
+	HWND CreateTrackbar(int x, int y, int width, int id, const wchar_t* label);
 	void SavePicture(HBITMAP BitMap, const char* Name);
+	void UpdateColorPhases(int sliderID, double& phaseVar);
 private:
 	HWND hwnd;
 	HWND hwndMandelbrot;
 	HWND hwndJulia;
 	HWND hwndCoordsStatic;
+	HWND hRedSlider;
+	HWND hBlueSlider;
+	HWND hGreenSlider;
+	double redPhase;
+	double bluePhase;
+	double greenPhase;
 	static LRESULT CALLBACK StaticWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	LRESULT WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void Registed(HINSTANCE hInstance);
@@ -52,12 +60,16 @@ public:
 	void createBitmap(int w, int h);
 	HBITMAP GetBitmap() const { return hBitmap; };
 	void SetPixel(int x, int y, COLORREF color);
+	void SetColorPhase(double r, double b, double g);
 	void RenderFromPixels(int startX, int startY, int endX, int endY);
 	void Draw();
 	double PixelToMathY(int pixelY);
 	double PixelToMathX(int pixelX);
 	COLORREF CalculateMandelbrot(int x,int y);
 private:
+	double redPhase;
+	double bluePhase;
+	double greenPhase;
 	HBITMAP hBitmap;
 	BYTE* pixels;
 	int width, height;
@@ -79,7 +91,7 @@ public:
 	void createBitmap(int w, int h);
 	HBITMAP GetBitmap() const { return hBitmap; };
 	void RenderFromPixels(int startX, int startY, int endX, int endY);
-
+	void SetColorPhase(double r, double b, double g);
 	void SetPixel(int x, int y, COLORREF color);
 	void Draw();
 	COLORREF CalculateJulia(int x, int y);
@@ -87,6 +99,9 @@ public:
 	double PixelToMathX(int pixelX);
 
 private:
+	double redPhase;
+	double bluePhase;
+	double greenPhase;
 	HBITMAP hBitmap;
 	BYTE* pixels;
 	int width, height;

@@ -134,6 +134,9 @@ void MainWindow::Create(HINSTANCE hInstance, int nCmdShow) {
     if (hwndCoordsStatic) {
         g_oldStaticProc = (WNDPROC)SetWindowLongPtr(hwndCoordsStatic, GWLP_WNDPROC, (LONG_PTR)CoordsStaticProc);
     }
+    hRedSlider = CreateTrackbar(250, 100, 200, ID_RED_SLIDER, L"Red Phase");
+hGreenSlider = CreateTrackbar(250, 150, 200, ID_GREEN_SLIDER, L"Green Phase");  
+hBlueSlider = CreateTrackbar(250, 200, 200, ID_BLUE_SLIDER, L"Blue Phase");
     ShowWindow(hwnd, nCmdShow);
     UpdateWindow(hwnd);
 }
@@ -426,6 +429,19 @@ LRESULT MainWindow::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         SetWindowText(hwndCoordsStatic, buffer);
         return 0;
     }
+    case WM_HSCROLL: {
+        HWND hSlider = (HWND)lParam;
+        int phase = (int)SendMessage(hSlider, TBM_GETPOS, 0, 0);
+        if (hSlider == hRedSlider) {
+            UpdateColorPhases(ID_RED_SLIDER, redPhase);
+        }
+        else if (hSlider == hBlueSlider) {
+            UpdateColorPhases(ID_BLUE_SLIDER, bluePhase);
+        }
+        else if (hSlider == hGreenSlider) {
+            UpdateColorPhases(ID_GREEN_SLIDER, greenPhase);
+        }
+    }
     }
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
@@ -523,4 +539,62 @@ void MainWindow::SavePicture(HBITMAP BitMap  , const char* Name) {
     CoUninitialize();   
 
     MessageBox(hwnd, L"Файл сохранен!", L"Успех", MB_OK);
+}
+void MandelbrottRender::SetColorPhase(double r, double b, double g) {
+    redPhase = r;
+    bluePhase = b;
+    greenPhase = g;
+};
+void JuliaRender::SetColorPhase(double r, double b, double g) {
+    redPhase = r;
+    bluePhase = b;
+    greenPhase = g;
+};
+
+HWND MainWindow::CreateTrackbar(int x, int y, int width, int id, const wchar_t* label) {
+    HINSTANCE hInstance = (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE);
+    CreateWindow(L"STATIC",
+        label,
+        WS_CHILD | WS_VISIBLE | SS_NOTIFY,
+        1920-x, y - 19, 50, 20,
+        hwnd,
+        NULL,
+        hInstance,
+        NULL);
+    HWND hSlider = CreateWindow(TRACKBAR_CLASS,
+        L"",
+        WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_BOTH,
+        1920-x, y, width, 30,
+        hwnd, (HMENU)(INT_PTR)id, hInstance, NULL);
+
+    SendMessage(hSlider, TBM_SETRANGE, TRUE, MAKELONG(-157, 157));
+    SendMessage(hSlider, TBM_SETPOS, TRUE, 0);
+    SendMessage(hSlider, TBM_SETPAGESIZE, 0, 10);
+    return hSlider;
+
+}
+
+void MainWindow::UpdateColorPhases(int sliderID, double& phaseVar) {
+    HWND hSlider = GetDlgItem(hwnd, sliderID);
+    int value = SendMessage(hSlider, TBM_GETPOS, 0, 0);
+    phaseVar = value / 100.0;
+    HWND hFractal = FindWindowEx(hwnd, NULL, Name_Mandelbrott, NULL);
+    if (!hFractal) {
+        hFractal = FindWindowEx(hwnd, NULL, Name_Julia, NULL);
+    }
+    if (hFractal) {
+        void* rendererPtr = (void*)GetWindowLongPtr(hFractal, GWLP_USERDATA);
+        MandelbrottRender* mandelRenderer = (MandelbrottRender*)rendererPtr;
+        JuliaRender* juliaRenderer = (JuliaRender*)rendererPtr;
+        if (mandelRenderer) {
+            mandelRenderer->SetColorPhase(redPhase, greenPhase, bluePhase);
+            mandelRenderer->Draw();
+            InvalidateRect(hFractal, NULL, TRUE); 
+        }
+        else if (juliaRenderer) {
+            juliaRenderer->SetColorPhase(redPhase, greenPhase, bluePhase);
+            juliaRenderer->Draw();
+            InvalidateRect(hFractal, NULL, TRUE);
+        }
+    }
 }
