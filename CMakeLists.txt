@@ -15,7 +15,8 @@ add_executable(Fractall_app
     source/FractallRender.cpp
     source/AppManager.cpp
     source/WinMain.cpp
- "source/BigDouble.cpp")
+ "source/BigDouble.cpp" 
+ source/BlockScheduler.cpp )
 
 target_compile_definitions(Fractall_app PRIVATE UNICODE _UNICODE)
 

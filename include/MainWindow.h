@@ -1,7 +1,10 @@
 #pragma once
 #include "Windows.h"
 #include <memory>
+#include "BlockScheduler.h"
 const wchar_t MainWindow_NAME[] = L"Fractall Application";
+
+class BlockScheduler;
 
 class MainWindow {
 public:
@@ -66,6 +69,7 @@ public:
 	double PixelToMathY(int pixelY);
 	double PixelToMathX(int pixelX);
 	COLORREF CalculateMandelbrot(int x,int y);
+	void RenderWorker(BlockScheduler& sheduler);
 private:
 	double redPhase;
 	double bluePhase;
@@ -97,6 +101,7 @@ public:
 	COLORREF CalculateJulia(int x, int y);
     double PixelToMathY(int pixelY);
 	double PixelToMathX(int pixelX);
+	void RenderWorker(BlockScheduler& sñheduler);
 
 private:
 	double redPhase;

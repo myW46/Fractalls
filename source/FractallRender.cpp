@@ -2,7 +2,14 @@
 #include "complex.h"
 #include <cmath>
 #include <thread>
+#include "BlockScheduler.h"
+#include <vector>
+#include <chrono>
+#include <string>
+
 const long double M_PI = std::acos(-1.0);
+
+
 void MandelbrottRender::createBitmap(int w, int h){
 	width = w;
 	height = h;
@@ -53,13 +60,34 @@ void JuliaRender::createBitmap(int w, int h) {
 	bluePhase = 2 * M_PI / 3;
 }
 void MandelbrottRender::Draw() {
-	for (int y = 0; y < height; y++) {
+	/*auto start = std::chrono::high_resolution_clock::now();*/
+	BlockScheduler scheduler(width, height);
+	std::vector<std::thread> threads;
+	for (int i = 0; i < 8; i++) {
+		threads.emplace_back([this, &scheduler]() {
+			this->RenderWorker(scheduler);
+			});
+	}
+
+	for (auto& t : threads) {
+		t.join();
+	}
+	
+	
+	
+	/*for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			COLORREF color = CalculateMandelbrot(x, y);
 			SetPixel(x, y, color);
 		
 		}
-	}
+	}*/
+	/*auto end = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);*/
+
+	/*std::wstring message = L"Многопоточный рендеринг: " +
+		std::to_wstring(duration.count()) + L" мс";
+	MessageBox(NULL, message.c_str(), L"Производительность", MB_OK);*/
 }
 void MandelbrottRender::SetPixel(int x, int y, COLORREF color) {
 	int index = (y*width  + x) * 4;
@@ -104,13 +132,24 @@ void MandelbrottRender::RenderFromPixels(int startX, int startY, int endX, int e
 
 }
 void JuliaRender::Draw() {
-	for (int y = 0; y < height; y++) {
+	
+	BlockScheduler scheduler(width, height);
+	std::vector<std::thread> threads;
+	for (int i = 0; i < 8; i++) {
+		threads.emplace_back([this, &scheduler]() {
+			this->RenderWorker(scheduler);
+			});
+	}
+	for (auto& t : threads) {
+		t.join();
+	}
+	/*for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			COLORREF color = CalculateJulia(x, y);
 			SetPixel(x, y, color);
 
 		}
-	}
+	}*/
 
 }
 
@@ -178,3 +217,35 @@ double JuliaRender::PixelToMathX(int pixelX) {
 double JuliaRender::PixelToMathY(int pixelY) {
 	return viewTop + (pixelY / (double)height) * (viewBottom - viewTop);
 }
+
+void MandelbrottRender::RenderWorker(BlockScheduler& sсheduler) {
+	int block_x, block_y;
+	int start_x, start_y;
+	int end_x, end_y;
+
+	while (sсheduler.GetNextBlock(block_x, block_y, start_x, start_y, end_x, end_y, 800,800)) {
+		for (int y = start_y; y < end_y; y++) {
+			for (int x = start_x; x < end_x; x++) {
+				COLORREF color = CalculateMandelbrot(x, y);
+				SetPixel(x, y, color);
+			}
+		}
+
+	}
+};
+
+void JuliaRender::RenderWorker(BlockScheduler& sсheduler) {
+	int block_x, block_y;
+	int start_x, start_y;
+	int end_x, end_y;
+
+	while (sсheduler.GetNextBlock(block_x, block_y, start_x, start_y, end_x, end_y, 800, 800)) {
+		for (int y = start_y; y < end_y; y++) {
+			for (int x = start_x; x < end_x; x++) {
+				COLORREF color = CalculateJulia(x, y);
+				SetPixel(x, y, color);
+			}
+		}
+
+	}
+};

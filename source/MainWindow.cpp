@@ -4,7 +4,8 @@
 #include <shobjidl.h>     
 #include <objbase.h> 
 #include <string>
-#include <shlwapi.h>      
+#include <shlwapi.h>  
+#include "BlockScheduler.h"
 #pragma comment(lib, "shlwapi.lib")  
 
 const wchar_t Name[] = L"Application";
