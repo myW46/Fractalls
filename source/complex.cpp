@@ -44,4 +44,4 @@ Complex Complex::operator*(double scalar) const {
 Complex operator*(double scalar, const Complex& complex) {
 	return complex * scalar; 
 }
-;
+;	

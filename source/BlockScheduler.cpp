@@ -5,7 +5,7 @@ BlockScheduler::BlockScheduler(int width, int height ){
 	total_blocks_x = (width + block_size - 1) / block_size;
 	total_blocks_y = (height + block_size - 1) / block_size;
 	next_block = 0;
-	this->block_size = block_size;
+
 
 }
 bool BlockScheduler::GetNextBlock(int& block_x, int& block_y,
